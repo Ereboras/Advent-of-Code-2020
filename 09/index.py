@@ -18,6 +18,8 @@ def findContiguous(nbrList, nbrToFind):
             contiguousList.append(nbrList[y])
             if nbrAdded == nbrToFind:
                 return min(contiguousList) + max(contiguousList)
+            elif nbrAdded > nbrToFind:
+                break
     return 0
 
 def part1(nbrList, size):
