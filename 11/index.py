@@ -3,61 +3,37 @@ from collections import defaultdict
 f = open('data.txt', 'r')
 lineGroup = f.read().split('\n')
 
-def passengerWave(lineGroup):
+def seeNeighborsOccupied(lineGroup, i, y):
+    countOccupied = 0
+    if i > 0 and lineGroup[i-1][y] == '#': # Top
+        countOccupied += 1
+    if i > 0 and y < len(lineGroup[i]) - 1 and lineGroup[i-1][y+1] == '#': # Top right
+        countOccupied += 1
+    if y < len(lineGroup[i]) - 1 and lineGroup[i][y+1] == '#': # Right
+        countOccupied += 1
+    if i < len(lineGroup) - 1 and y < len(lineGroup[i]) - 1 and lineGroup[i+1][y+1] == '#': # Bottom right
+        countOccupied += 1
+    if i < len(lineGroup) - 1 and lineGroup[i+1][y] == '#': # Bottom
+        countOccupied += 1
+    if i < len(lineGroup) - 1 and y > 0 and lineGroup[i+1][y-1] == '#': # Bottom left
+        countOccupied += 1
+    if y > 0 and lineGroup[i][y-1] == '#': # Left
+        countOccupied += 1
+    if i > 0 and y > 0 and lineGroup[i-1][y-1] == '#': # Top left
+        countOccupied += 1
+    return countOccupied
+def firstPassengerWave(lineGroup):
     reconstructedList = []
     for i in range(0, len(lineGroup)):
-        line = lineGroup[i]
         reconstructedList.append(lineGroup[i])
-        for y in range(0, len(line)):
-            seat = line[y]
-
-            if seat == 'L':
-                checkSeats = True
-                if i > 0 and lineGroup[i-1][y] == '#': # Top
-                    checkSeats = False
-                if i > 0 and y < len(line) - 1 and lineGroup[i-1][y+1] == '#': # Top right
-                    checkSeats = False
-                if y < len(line) - 1 and lineGroup[i][y+1] == '#': # Right
-                    checkSeats = False
-                if i < len(lineGroup) - 1 and y < len(line) - 1 and lineGroup[i+1][y+1] == '#': # Bottom right
-                    checkSeats = False
-                if i < len(lineGroup) - 1 and lineGroup[i+1][y] == '#': # Bottom
-                    checkSeats = False
-                if i < len(lineGroup) - 1 and y > 0 and lineGroup[i+1][y-1] == '#': # Bottom left
-                    checkSeats = False
-                if y > 0 and lineGroup[i][y-1] == '#': # Left
-                    checkSeats = False
-                if i > 0 and y > 0 and lineGroup[i-1][y-1] == '#': # Top left
-                    checkSeats = False
-
-                if checkSeats:
-                    reconstructedList[i] = reconstructedList[i][:y] + '#' + reconstructedList[i][y+1:]
-            
-            elif seat == '#':
-                countOccupied = 0
-                if i > 0 and lineGroup[i-1][y] == '#': # Top
-                    countOccupied += 1
-                if i > 0 and y < len(line) - 1 and lineGroup[i-1][y+1] == '#': # Top right
-                    countOccupied += 1
-                if y < len(line) - 1 and lineGroup[i][y+1] == '#': # Right
-                    countOccupied += 1
-                if i < len(lineGroup) - 1 and y < len(line) - 1 and lineGroup[i+1][y+1] == '#': # Bottom right
-                    countOccupied += 1
-                if i < len(lineGroup) - 1 and lineGroup[i+1][y] == '#': # Bottom
-                    countOccupied += 1
-                if i < len(lineGroup) - 1 and y > 0 and lineGroup[i+1][y-1] == '#': # Bottom left
-                    countOccupied += 1
-                if y > 0 and lineGroup[i][y-1] == '#': # Left
-                    countOccupied += 1
-                if i > 0 and y > 0 and lineGroup[i-1][y-1] == '#': # Top left
-                    countOccupied += 1
-
-                if countOccupied >= 4:
-                    reconstructedList[i] = reconstructedList[i][:y] + 'L' + reconstructedList[i][y+1:]
+        for y in range(0, len(lineGroup[i])):
+            if lineGroup[i][y] == 'L' and seeNeighborsOccupied(lineGroup, i, y) == 0:
+                reconstructedList[i] = reconstructedList[i][:y] + '#' + reconstructedList[i][y+1:]
+            elif lineGroup[i][y] == '#' and seeNeighborsOccupied(lineGroup, i, y) >= 4:
+                reconstructedList[i] = reconstructedList[i][:y] + 'L' + reconstructedList[i][y+1:]
     return reconstructedList
 
 def seeNbrOccupiedSeat(lineGroup, i, y):
-    #print('seeNbrOccupiedSeat : i:{}, y:{}'.format(i, y))
     countOccupied = 0
 
     topChecked = False
@@ -145,10 +121,9 @@ def seeNbrOccupiedSeat(lineGroup, i, y):
             break
         elif lineGroup[i][z] == 'L':
             break
-    #print('Counting {} seats occupied in the vision'.format(countOccupied))
     return countOccupied
 
-def secondWave(lineGroup):
+def secondPassengerWave(lineGroup):
     reconstructedList = []
     for i in range(0, len(lineGroup)):
         line = lineGroup[i]
@@ -180,19 +155,17 @@ def displayList(lineGroup):
 def part1and2(lineGroup, part):
     total = 0
     lineGroupCopy = []
-    #displayList(lineGroup)
     while not compareTwoList(lineGroup, lineGroupCopy):
         lineGroupCopy = lineGroup.copy()
         if part == 'part1':
-            lineGroup = passengerWave(lineGroup)
+            lineGroup = firstPassengerWave(lineGroup)
         else:
-            lineGroup = secondWave(lineGroup)
-            #print('---------------')
-        #displayList(lineGroup)
+            lineGroup = secondPassengerWave(lineGroup)
     for line in lineGroup:
         for seat in line:
             if seat == '#':
                 total += 1
     return total
 
+print(part1and2(lineGroup, 'part1'))
 print(part1and2(lineGroup, 'part2'))
